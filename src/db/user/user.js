@@ -2,15 +2,10 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const UserSchema = new Schema({
-  phone: String,
-  id: String,
-  name: String,
-  nick: String,
-  email: String,
-  level: Number,
-  create: Number,
-  experience: Number,
-  icon: String,
-  introduce: String
+  openid: String,
+  access_token: String,
+  expires_time: Number,
+  refresh_token: String,
+  scope: String
 })
-module.exports =  UserSchema
+module.exports = UserSchema

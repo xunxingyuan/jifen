@@ -5,6 +5,7 @@ const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
 const users = require('./routes/users')
+const auth = require('./routes/auth')
 
 //db数据库初始化
 require('./src/db')
@@ -30,6 +31,7 @@ app.use(async (ctx, next) => {
 
 // routes
 app.use(users.routes(), users.allowedMethods())
+app.use(auth.routes(), auth.allowedMethods())
 
 
 // error-handling
