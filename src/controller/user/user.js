@@ -178,7 +178,7 @@ function getImgFromWx(token, lists) {
                 let base64Data = imgData.replace(/^data:image\/\w+;base64,/, "");
                 let dataBuffer = new Buffer(base64Data, 'base64');
                 let now = new Date().getTime() + '_' + Math.floor(Math.random() * 1000)
-                let imgPath = "/" + now + '.jpg'
+                let imgPath = "/" + now + '.jpeg'
                 fs.writeFile(process.cwd() + "/imgSrc" + imgPath, dataBuffer, function (err) {
                     if (err) {
                         console.log(err)
