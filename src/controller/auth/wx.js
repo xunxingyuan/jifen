@@ -200,7 +200,3 @@ module.exports = {
         }
     }
 }
-
-async function getTicket(ctx, next) {
-
-}
