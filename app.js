@@ -6,6 +6,14 @@ const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
 const users = require('./routes/users')
 const auth = require('./routes/auth')
+const path = require('path')
+const static = require('koa-static')
+
+//设置静态资源的路径 
+const staticPath = './imgSrc'
+app.use(static(
+  path.join( __dirname, staticPath)
+))
 
 //db数据库初始化
 require('./src/db')
