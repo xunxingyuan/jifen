@@ -188,9 +188,9 @@ function getImgFromWx(token, lists) {
         .then(res => {
           let now = new Date().getTime() + '_' + Math.floor(Math.random() * 1000)
           let imgPath = "/" + now + '.jpg'
-          res.data.pipe(fs.createWriteStream(process.cwd() + "/imgSrc" + imgPath))
+          res.data.pipe(fs.createWriteStream(process.cwd() + "/static/imgSrc" + imgPath))
           all += 1
-          srcList.push("/imgSrc" + imgPath)
+          srcList.push("/static/imgSrc" + imgPath)
           if (all === flag) {
             console.log(srcList)
             resolve(srcList)

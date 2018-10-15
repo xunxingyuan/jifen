@@ -10,7 +10,7 @@ const path = require('path')
 const static = require('koa-static')
 
 //设置静态资源的路径 
-const staticPath = './imgSrc'
+const staticPath = './static'
 app.use(static(
   path.join( __dirname, staticPath)
 ))
