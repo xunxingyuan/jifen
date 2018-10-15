@@ -21,4 +21,9 @@ router.post('/uploadImg', async (ctx, next) => {
 })
 
 
+router.get('/testImg', async (ctx, next) => {
+  return User.testGetFile(ctx,next)
+})
+
+
 module.exports = router
