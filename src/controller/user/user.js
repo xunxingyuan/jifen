@@ -172,14 +172,13 @@ function getImgFromWx(token, lists) {
             axios.get(srcUrl).then((res) => {
                 
                 console.log(res)
-                //接收前台POST过来的base64
                 let imgData = res.data
                 //过滤data:URL
                 // let base64Data = imgData.replace(/^data:image\/\w+;base64,/, "");
-                // let dataBuffer = new Buffer(base64Data, 'base64');
+                let dataBuffer = new Buffer(imgData, 'binary');
                 let now = new Date().getTime() + '_' + Math.floor(Math.random() * 1000)
-                let imgPath = "/" + now + '.jpeg'
-                fs.writeFile(process.cwd() + "/imgSrc" + imgPath, imgData, function (err) {
+                let imgPath = "/" + now + '.jpg'
+                fs.writeFile(process.cwd() + "/imgSrc" + imgPath, dataBuffer, function (err) {
                     if (err) {
                         console.log(err)
                         console.log('save fail')
