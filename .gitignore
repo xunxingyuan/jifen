@@ -2,7 +2,7 @@
 node_modules/
 /conf/
 /dist/
-/imgSrc/
+/static/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
