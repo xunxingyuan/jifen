@@ -11,6 +11,7 @@ const userSchema = require('./user/user')
 const wxSchema = require('./wx/wx')
 const userInfoSchema = require('./user/userInfo')
 const uploadSchema = require('./user/upload')
+const youzanSchema = require('./youzan/youzan')
 
 //数据库认证
 let authUrl = "mongodb://"+ options.user + ':'+ options.pass + '@' + options.path
@@ -27,5 +28,6 @@ exports.User = mongoose.model('users',userSchema)
 exports.UserInfo = mongoose.model('userinfo',userInfoSchema)
 exports.Upload = mongoose.model('upload',uploadSchema)
 exports.Wx = mongoose.model('wx',wxSchema)
+exports.Youzan = mongoose.model('youzan',youzanSchema)
 
 

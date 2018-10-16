@@ -6,6 +6,7 @@ const User = db.User
 const axios = require('axios')
 const Json = require('../../tools/jsonResponse')
 const fs = require('fs')
+const Youzan = require('../youzan/youzan')
 
 
 module.exports = {
@@ -170,16 +171,31 @@ module.exports = {
         }
     },
     testGetFile: async (ctx, next) => {
-        let wxMsg = await Wx.findOne({
-            id: '1'
-        })
-        let src = ['zDtw6Z1KbNBkf5JNBrpOOx-LJw2m0__5O2MJbhLEV2UEV6x4r5SvL0dGt2D0IPWP', '0kbTGFKhfn1tWOQiwDO0Yq5-uL76FfWz81vifhtTlJM9BKiLq0b15A5ityxna9Hb']
-        let result = await getImgFromWx(wxMsg.accessToken, src)
-        if (result) {
-            Json.res(ctx, 200, '成功')
-        } else {
-            Json.res(ctx, 201, '失败')
+        // let wxMsg = await Wx.findOne({
+        //     id: '1'
+        // })
+        let query = ctx.request.query
+        let checkResult = await Youzan.checkUser(query.phone)
+        console.log(checkResult)
+        if(checkResult.data.hasOwnProperty('response')){
+            let createresult = await Youzan.updateUser(query.phone,query.nick)
+            console.log(createresult)
+            Json.res(ctx, 200, '已有')
+
+        }else{
+            let updateresult = await Youzan.createUser(query.phone,query.nick)
+            console.log(updateresult)
+            Json.res(ctx, 200, '未有')
+
         }
+        
+        // let src = ['zDtw6Z1KbNBkf5JNBrpOOx-LJw2m0__5O2MJbhLEV2UEV6x4r5SvL0dGt2D0IPWP', '0kbTGFKhfn1tWOQiwDO0Yq5-uL76FfWz81vifhtTlJM9BKiLq0b15A5ityxna9Hb']
+        // let result = await getImgFromWx(wxMsg.accessToken, src)
+        // if (result) {
+        //     Json.res(ctx, 200, '成功')
+        // } else {
+        //     Json.res(ctx, 201, '失败')
+        // }
     }
 }
 
