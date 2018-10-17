@@ -6,6 +6,7 @@ const User = db.User
 const axios = require('axios')
 const Json = require('../../tools/jsonResponse')
 const fs = require('fs')
+const Wechat = require('../wechat/message')
 
 const Conf = require('../../../conf/conf')
 
@@ -154,8 +155,7 @@ module.exports = {
                                                     imgUpload: imgUploadData
                                                 }
                                             })
-
-                                            uploadSuccess(wxMsg.accessToken, user.openid, {
+                                            Wechat.sendMessage(wxMsg.accessToken, user.openid, {
                                                 tip: '亲爱的伙伴，感谢您参与本次活动，我们已经收到了您上传的截图，并将在五个工作日内完成图片审核及配送积分。',
                                                 name: '晒图赚积分',
                                                 time: new Date().toLocaleString(),
@@ -230,35 +230,3 @@ function getImgFromWx(token, lists) {
     })
 }
 
-//通知用户上传成功
-function uploadSuccess(ACCESS_TOKEN, OPENID, sendData, template_id) {
-    let data = {
-        "touser": OPENID,
-        "template_id": template_id,
-        "url": Conf.url + '/jifen',
-        // "miniprogram": {
-        //     "appid": "xiaochengxuappid12345",
-        //     "pagepath": "index?foo=bar"
-        // },
-        "data": {
-            "tip": {
-                "value": sendData.tip,
-                "color": "#173177"
-            },
-            "name": {
-                "value": sendData.name,
-                "color": "#173177"
-            },
-            "time": {
-                "value": sendData.time,
-                "color": "#173177"
-            },
-            "intro": {
-                "value": sendData.intro,
-                "color": "#173177"
-            }
-        }
-    }
-    let url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=" + ACCESS_TOKEN
-    return axios.post(url, data)
-}
