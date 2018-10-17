@@ -3,6 +3,8 @@ const Schema = mongoose.Schema;
 
 const mySchema = new Schema({
   openid: String,
-  imgUpload: Array
+  imgUpload: Array,
+  phone: String,
+  nick: String
 },{ collection: 'upload' })
 module.exports = mySchema
