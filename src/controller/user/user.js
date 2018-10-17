@@ -7,6 +7,8 @@ const axios = require('axios')
 const Json = require('../../tools/jsonResponse')
 const fs = require('fs')
 
+const Conf = require('../../../conf/conf')
+
 
 module.exports = {
     checkUser: async (ctx, next) => {
@@ -141,6 +143,7 @@ module.exports = {
                                         let result = await getImgFromWx(wxMsg.accessToken, src)
                                         console.log(result)
                                         result.forEach((e) => {
+                                            e = Conf.url + e
                                             imgUploadData[0].srcList.push(e)
                                         })
                                         try {
@@ -232,7 +235,7 @@ function uploadSuccess(ACCESS_TOKEN, OPENID, sendData, template_id) {
     let data = {
         "touser": OPENID,
         "template_id": template_id,
-        "url": "http://192.168.0.116:8080/jifen",
+        "url": Conf.url + '/jifen',
         // "miniprogram": {
         //     "appid": "xiaochengxuappid12345",
         //     "pagepath": "index?foo=bar"
