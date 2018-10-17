@@ -6,6 +6,9 @@ const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
 const users = require('./routes/users')
 const auth = require('./routes/auth')
+const adminRouter = require('./routes/admin')
+
+
 const path = require('path')
 const static = require('koa-static')
 
@@ -40,7 +43,7 @@ app.use(async (ctx, next) => {
 // routes
 app.use(users.routes(), users.allowedMethods())
 app.use(auth.routes(), auth.allowedMethods())
-
+app.use(adminRouter.routes(), adminRouter.allowedMethods())
 
 // error-handling
 app.on('error', (err, ctx) => {
