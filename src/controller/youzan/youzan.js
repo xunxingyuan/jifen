@@ -2,6 +2,7 @@ const db = require('../../db/index')
 const Youzan = db.Youzan
 const axios = require('axios')
 const Json = require('../../tools/jsonResponse')
+const Qs = require('qs')
 
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 
@@ -42,8 +43,31 @@ async function getToken(){
 }
 
 
+async function createUser(phone,nick){
+    let tokenData = await getToken()
+
+    let account = JSON.stringify({
+        "account_type": "Mobile", 
+        "account_id": phone
+    })
+    let customer_create = JSON.stringify({"name": nick})
+    let url = "https://open.youzan.com/api/oauthentry/youzan.scrm.customer/3.0.0/create?access_token="+ tokenData.token + '&account='+account + '&customer_create='+customer_create
+    return await axios.post(url, Qs.stringify(reqData))
+}
+async function updateUser(phone,nick){
+    let tokenData = await getToken()
+    let account = JSON.stringify({
+        "account_type": "Mobile", 
+        "account_id": phone
+    })
+    let customer_update = JSON.stringify({"name": nick})
+    let url = "https://open.youzan.com/api/oauthentry/youzan.scrm.customer/3.0.0/update?access_token="+ tokenData.token + '&account='+account + '&customer_update='+customer_update
+    return await axios.post(url)
+}
+
+
 module.exports = {
-    checkUser: async (phone) => {
+    checkUser: async (phone,nick) => {
         let tokenData = await getToken()
         console.log(tokenData)
         let url = 'https://open.youzan.com/api/oauthentry/youzan.scrm.customer/3.1.0/get'
@@ -56,38 +80,15 @@ module.exports = {
                 }
             }
         })
-        return checkUser
-        // if(checkUser.data.hasOwnProperty('response')){
-        //     let update = await updateUser(phone,nick,tokenData.token)
-        //     console.log(update)
-        // }else{
-        //     let create = await createUser(phone,nick,tokenData.token)
-        //     console.log(create)
-        // }
+        if(checkUser.data.hasOwnProperty('response')){
+            let update = await updateUser(phone,nick,tokenData.token)
+            console.log(update)
+            return update.data
+        }else{
+            let create = await createUser(phone,nick,tokenData.token)
+            console.log(create)
+            return create.data
+        }        
     },
-     createUser: async (phone,nick) =>{
-        let tokenData = await getToken()
-        let reqData = {
-            "mobile": phone,
-            "customer_create":{
-                "name": nick
-            }
-        }
-        let url = "https://open.youzan.com/api/oauthentry/youzan.scrm.customer/3.0.0/create?access_token="+ tokenData.token
-        return await axios.post(url, reqData)
-    },
-    updateUser: async (phone,nick) => {
-        let tokenData = await getToken()
-        let reqData = {
-            "account":{
-                "account_type": "Mobile", 
-                "account_id": phone
-            },
-            "customer_update":{
-                "name": nick
-            }
-        }
-        let url = "https://open.youzan.com/api/oauthentry/youzan.scrm.customer/3.0.0/update?access_token="+ tokenData.token
-        return await axios.post(url, reqData)
-    }
+    
 }
