@@ -6,6 +6,8 @@ const Upload = db.Upload
 const User = db.User
 const Json = require('../../tools/jsonResponse')
 const fs = require('fs')
+const Youzan = require('../youzan/youzan')
+
 
 
 module.exports = {
@@ -82,27 +84,41 @@ module.exports = {
                         })
                         if(uploadItem){
                             console.log(uploadItem.imgUpload)
+                            let checkResult = 0
+                            
                             uploadItem.imgUpload.forEach((e) => {
                                 if (e.uploadId === query.id) {
-                                    if (query.type == 1) {
+                                    if (query.type == 1 && e.status == 0) {
                                         e.status = 1
+                                        checkResult = 1
                                     } else {
                                         e.status = 2
                                     }
                                 }
                             })
-                            try {
-                                let result = await Upload.updateOne({
-                                    _id: query.uploadUserId
-                                },{
-                                    $set: {
-                                        imgUpload: uploadItem.imgUpload
+
+                            if(checkResult = 1){
+                                let addResult = await Youzan.addJfnumber(uploadItem.phone,100)
+                                if(addResult.data.response&&addResult.data.response.is_success){
+                                    try {
+                                        let result = await Upload.updateOne({
+                                            _id: query.uploadUserId
+                                        },{
+                                            $set: {
+                                                imgUpload: uploadItem.imgUpload
+                                            }
+                                        })
+                                        Json.res(ctx, 200, '审核成功')  
+                                    } catch (error) {
+                                        Json.res(ctx, 201, '更新失败')
                                     }
-                                })
-                                Json.res(ctx, 200, '审核成功')
-                            } catch (error) {
-                                Json.res(ctx, 201, '更新失败')
+                                }else{
+                                    Json.res(ctx, 201, '审核失败，稍后重试') 
+                                }
+                            }else{
+                                Json.res(ctx, 201, '审核失败，稍后重试') 
                             }
+                            
                         }else{
                             Json.res(ctx, 201, '无相关数据')
                         }

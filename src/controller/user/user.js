@@ -26,14 +26,29 @@ module.exports = {
                 if (userInfo.length === 0) {
                     Json.res(ctx, 201, '用户信息不完整')
                 } else {
-                    Json.res(ctx, 200, '成功', {
-                        nick: userInfo[0].nick,
-                        phone: userInfo[0].phone,
-                        name: userInfo[0].name,
-                        areaCode: userInfo[0].areaCode,
-                        areaName: userInfo[0].areaName,
-                        address: userInfo[0].address
-                    })
+                    let jifen = await Youzan.getJfnumber(userInfo[0].phone)
+                    if(jifen.data.response){
+                        Json.res(ctx, 200, '成功', {
+                            nick: userInfo[0].nick,
+                            phone: userInfo[0].phone,
+                            name: userInfo[0].name,
+                            areaCode: userInfo[0].areaCode,
+                            areaName: userInfo[0].areaName,
+                            address: userInfo[0].address,
+                            point: jifen.data.response.point
+                        })
+                    }else{
+                        Json.res(ctx, 200, '成功', {
+                            nick: userInfo[0].nick,
+                            phone: userInfo[0].phone,
+                            name: userInfo[0].name,
+                            areaCode: userInfo[0].areaCode,
+                            areaName: userInfo[0].areaName,
+                            address: userInfo[0].address
+                        })
+                    }
+
+                    
                 }
             } catch (error) {
                 Json.res(ctx, 201, '用户不存在')
@@ -67,7 +82,13 @@ module.exports = {
                 try {
                     let userInfoSave = await new UserInfo(userData).save()
                     let uploadSave = await new Upload(uploadData).save()
-                    Json.res(ctx, 200, '成功')
+                    let youzanResult = await Youzan.checkUser(query.phone,query.nick)
+                    
+                    if(userInfoSave&&uploadSave&&youzanResult){
+                        Json.res(ctx, 200, '成功')
+                    }else{
+                        Json.res(ctx, 201, '创建用户故障')
+                    }
                 } catch (error) {
                     Json.res(ctx, 201, '用户系统错误')
                 }
@@ -196,9 +217,11 @@ module.exports = {
         //     Json.res(ctx, 201, '失败')
         // }
         let query = ctx.request.query
-        let result = await Youzan.checkUser(query.phone,query.nick)
+        // let result = await Youzan.checkUser(query.phone,query.nick)
+        // let result = await Youzan.getJfnumber(query.phone)
+        let result = await Youzan.addJfnumber(query.phone,10)
         Json.res(ctx, 200, '成功',{
-            result: result
+            result: result.data
         })
     }
 }

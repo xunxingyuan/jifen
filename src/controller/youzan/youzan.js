@@ -45,7 +45,6 @@ async function getToken(){
 
 async function createUser(phone,nick){
     let tokenData = await getToken()
-
     let account = JSON.stringify({
         "account_type": "Mobile", 
         "account_id": phone
@@ -63,6 +62,18 @@ async function updateUser(phone,nick){
     let customer_update = JSON.stringify({"name": nick})
     let url = "https://open.youzan.com/api/oauthentry/youzan.scrm.customer/3.0.0/update?access_token="+ tokenData.token + '&account='+account + '&customer_update='+customer_update
     return await axios.post(url)
+}
+
+async function getJf(phone) {
+    let tokenData = await getToken() 
+    let url = "https://open.youzan.com/api/oauthentry/youzan.crm.fans.points/3.0.1/get?access_token="+ tokenData.token + "&mobile=" + phone
+    return await axios.get(url)
+}
+
+async function addJf(phone,number){
+    let tokenData = await getToken() 
+    let url = "https://open.youzan.com/api/oauthentry/youzan.crm.customer.points/3.0.1/increase?access_token="+ tokenData.token + "&mobile=" + phone + '&points='+ number
+    return await axios.get(url)
 }
 
 
@@ -90,5 +101,11 @@ module.exports = {
             return create.data
         }        
     },
+    getJfnumber: (phone)=>{
+        return getJf(phone)
+    },
+    addJfnumber: (phone,point,)=>{
+        return addJf(phone,point)
+    }
     
 }
