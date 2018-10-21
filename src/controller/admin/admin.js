@@ -139,7 +139,7 @@ module.exports = {
                                 name: '晒图赚积分',
                                 time: new Date().toLocaleString(),
                                 intro: '审核成功，请持续关注哦~如有更多心得分享，请点击详情进行上传。'
-                            }, 'PHLimwrzsk2FY0_0PehumvZ2bZMZW30R4yExv6aDI1I').then((res) => {
+                            }, 'VnxQbsEQHU3whNzj28EGBYC77Vi6bta1pHgPR59SH_E').then((res) => {
                                 console.log(res)
                             })
                             Json.res(ctx, 200, '审核成功')
@@ -161,7 +161,7 @@ module.exports = {
                             name: '晒图赚积分',
                             time: new Date().toLocaleString(),
                             intro: '快点击详情正确晒图吧，赢得更多积分大奖。'
-                        }, 'PHLimwrzsk2FY0_0PehumvZ2bZMZW30R4yExv6aDI1I').then((res) => {
+                        }, 'VnxQbsEQHU3whNzj28EGBYC77Vi6bta1pHgPR59SH_E').then((res) => {
                             console.log(res)
                         })
                         Json.res(ctx, 200, '审核成功')

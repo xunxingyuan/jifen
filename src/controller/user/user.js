@@ -184,7 +184,7 @@ module.exports = {
                                 name: '晒图赚积分',
                                 time: new Date().toLocaleString(),
                                 intro: '审核成功后积分将自动更新到您的账户，请持续关注哦~如有更多心得分享，请点击详情进行上传。'
-                            }, 'PHLimwrzsk2FY0_0PehumvZ2bZMZW30R4yExv6aDI1I').then((res) => {
+                            }, 'VnxQbsEQHU3whNzj28EGBYC77Vi6bta1pHgPR59SH_E').then((res) => {
                                 console.log(res)
                             })
                             if (uploadResult) {
