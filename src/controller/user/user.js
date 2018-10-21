@@ -237,7 +237,7 @@ module.exports = {
                 })
                 let userUpload = await Upload.find({
                     openid: user.openid
-                })
+                }).sort({'_id': -1})
                 if (userUpload) {
                     // let resData = {
                     //     imgUpload: userUpload.imgUpload,
