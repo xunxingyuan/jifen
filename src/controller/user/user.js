@@ -26,8 +26,29 @@ module.exports = {
                 if (userInfo.length === 0) {
                     Json.res(ctx, 201, '用户信息不完整')
                 } else {
-                    let jifen = await Youzan.getJfnumber(userInfo[0].phone)
-                    if (jifen.data.response) {
+                    if(userInfo[0].phone){
+                        let jifen = await Youzan.getJfnumber(userInfo[0].phone)
+                        if (jifen.data.response) {
+                            Json.res(ctx, 200, '成功', {
+                                nick: userInfo[0].nick,
+                                phone: userInfo[0].phone,
+                                name: userInfo[0].name,
+                                areaCode: userInfo[0].areaCode,
+                                areaName: userInfo[0].areaName,
+                                address: userInfo[0].address,
+                                point: jifen.data.response.point
+                            })
+                        } else {
+                            Json.res(ctx, 200, '成功', {
+                                nick: userInfo[0].nick,
+                                phone: userInfo[0].phone,
+                                name: userInfo[0].name,
+                                areaCode: userInfo[0].areaCode,
+                                areaName: userInfo[0].areaName,
+                                address: userInfo[0].address
+                            })
+                        }
+                    }else{
                         Json.res(ctx, 200, '成功', {
                             nick: userInfo[0].nick,
                             phone: userInfo[0].phone,
@@ -35,16 +56,7 @@ module.exports = {
                             areaCode: userInfo[0].areaCode,
                             areaName: userInfo[0].areaName,
                             address: userInfo[0].address,
-                            point: jifen.data.response.point
-                        })
-                    } else {
-                        Json.res(ctx, 200, '成功', {
-                            nick: userInfo[0].nick,
-                            phone: userInfo[0].phone,
-                            name: userInfo[0].name,
-                            areaCode: userInfo[0].areaCode,
-                            areaName: userInfo[0].areaName,
-                            address: userInfo[0].address
+                            point: 0
                         })
                     }
                 }
@@ -71,20 +83,21 @@ module.exports = {
                     areaName: query.areaName,
                     address: query.address
                 }
+            
 
                 try {
                     let youzanResult = await Youzan.checkUser(query.phone, query.nick)
-                    if(youzanResult.hasOwnProperty('response')&&youzanResult.response){
+                    if (youzanResult.hasOwnProperty('response') && youzanResult.response) {
                         let userInfoSave = await new UserInfo(userData).save()
                         if (userInfoSave) {
                             Json.res(ctx, 200, '成功')
                         } else {
                             Json.res(ctx, 201, '创建用户故障')
                         }
-                    }else{
+                    } else {
                         Json.res(ctx, 201, '创建用户故障')
                     }
-                    
+
                 } catch (error) {
                     Json.res(ctx, 201, '用户系统错误')
                 }
@@ -98,45 +111,52 @@ module.exports = {
     updateUser: async (ctx, next) => {
         let query = ctx.request.body
         if (query.id && query.nick && query.phone) {
-            try {
-                let user = await User.findOne({
-                    _id: query.id
-                })
-                let userData = {
-                    nick: query.nick,
-                    phone: query.phone,
-                    name: query.name,
-                    areaCode: JSON.parse(query.areaCode),
-                    areaName: query.areaName,
-                    address: query.address
-                }
-                let uploadData = {
-                    phone: query.phone,
-                    nick: query.nick
-                }
+            let youzanResult = await Youzan.checkUser(query.phone, query.nick)
+            if (youzanResult.hasOwnProperty('response') && youzanResult.response) {
                 try {
-                    let userInfoSave = await UserInfo.updateOne({
-                        openid: user.openid
-                    }, {
-                            $set: userData
-                        })
-                    let uploadUpdate = await Upload.updateMany({
-                        openid: user.openid
-                    }, {
-                            $set: uploadData
+                    let user = await User.findOne({
+                        _id: query.id
                     })
-                    if (userInfoSave && uploadUpdate) {
-                        Json.res(ctx, 200, '成功')
-                    } else {
-                        Json.res(ctx, 201, '更新失败')
+                    let userData = {
+                        nick: query.nick,
+                        phone: query.phone,
+                        name: query.name,
+                        areaCode: JSON.parse(query.areaCode),
+                        areaName: query.areaName,
+                        address: query.address
                     }
-
+                    let uploadData = {
+                        phone: query.phone,
+                        nick: query.nick
+                    }
+                    try {
+                        let userInfoSave = await UserInfo.updateOne({
+                            openid: user.openid
+                        }, {
+                                $set: userData
+                            })
+                        let uploadUpdate = await Upload.updateMany({
+                            openid: user.openid
+                        }, {
+                                $set: uploadData
+                            })
+                        if (userInfoSave && uploadUpdate) {
+                            Json.res(ctx, 200, '成功')
+                        } else {
+                            Json.res(ctx, 201, '更新失败')
+                        }
+    
+                    } catch (error) {
+                        Json.res(ctx, 201, '用户系统错误')
+                    }
                 } catch (error) {
-                    Json.res(ctx, 201, '用户系统错误')
+                    Json.res(ctx, 201, '用户不存在')
                 }
-            } catch (error) {
-                Json.res(ctx, 201, '用户不存在')
+            } else {
+                Json.res(ctx, 201, '创建用户故障')
             }
+
+            
         } else {
             Json.res(ctx, 201, '参数不完整')
         }
@@ -222,7 +242,7 @@ module.exports = {
         //     Json.res(ctx, 201, '失败')
         // }
         let query = ctx.request.query
-        let result = await Youzan.checkUser(query.phone,query.nick)
+        let result = await Youzan.checkUser(query.phone, query.nick)
         // let result = await Youzan.getJfnumber(query.phone)
         // let result = await Youzan.addJfnumber(query.phone, 10)
         console.log(result)
@@ -237,7 +257,7 @@ module.exports = {
                 })
                 let userUpload = await Upload.find({
                     openid: user.openid
-                }).sort({'_id': -1})
+                }).sort({ '_id': -1 })
                 if (userUpload) {
                     // let resData = {
                     //     imgUpload: userUpload.imgUpload,

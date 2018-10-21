@@ -5,6 +5,7 @@ const Json = require('../../tools/jsonResponse')
 const axios = require('axios')
 const sign = require('../../tools/sign')
 const Conf = require('../../../conf/conf')
+const UserInfo = db.UserInfo
 
 module.exports = {
     getCode: async (ctx, next) => {
@@ -70,8 +71,19 @@ module.exports = {
                                 refresh_token: response.data.refresh_token,
                                 scope: response.data.scope
                             }
+                            let userInfoData = {
+                                openid: response.data.openid,
+                                nick: '',
+                                phone: '',
+                                name: '',
+                                areaCode: [],
+                                areaName: '',
+                                address: '',
+                            }
+
                             let userAdd = await new User(userData).save()
-                            if (userAdd) {
+                            let infoAdd = await new UserInfo(userInfoData).save()
+                            if (userAdd&&infoAdd) {
                                 Json.res(ctx, 200, '新建成功', {
                                     id: userAdd._id
                                 })
