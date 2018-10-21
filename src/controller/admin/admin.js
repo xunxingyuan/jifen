@@ -126,7 +126,7 @@ module.exports = {
             try{
                
                 if(query.type == 0){
-                    let addResult = await Youzan.addJfnumber(uploadItem.phone, 200)
+                    let addResult = await Youzan.addJfnumber(uploadItem.phone, 100)
                     if (addResult.data.response && addResult.data.response.is_success){
                         let checkResult = await  Upload.updateOne({
                             _id: query.id
