@@ -13,7 +13,7 @@ module.exports = {
         })
         if (res) {
             let APPID = res.appID
-            let redirect_uri = Conf.server.url + "/#/jifen"
+            let redirect_uri = Conf.server.url + "/jifen"
             let url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + APPID + "&redirect_uri=" + redirect_uri + "&response_type=code&scope=snsapi_base&state=123#wechat_redirect"
             Json.res(ctx, 200, '获取成功', {
                 url: url
