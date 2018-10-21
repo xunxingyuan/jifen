@@ -43,29 +43,23 @@ async function getToken(){
 }
 
 
-async function createUser(phone,nick){
-    let tokenData = await getToken()
-    let account = JSON.stringify({
-        "account_type": "Mobile", 
-        "account_id": phone
-    })
+ function createUser(phone,nick,token){
     let customer_create = JSON.stringify({"name": nick})
-    let url = "https://open.youzan.com/api/oauthentry/youzan.scrm.customer/3.0.0/create?access_token="+ tokenData.token + '&account='+account + '&customer_create='+customer_create
-    return await axios.post(url, Qs.stringify(reqData))
+    let url = "https://open.youzan.com/api/oauthentry/youzan.scrm.customer/3.0.0/create?access_token="+ token + '&mobile='+phone + '&customer_create='+customer_create
+    return  axios.post(encodeURI(url))
 }
-async function updateUser(phone,nick){
-    let tokenData = await getToken()
+ function updateUser(phone,nick,token){
     let account = JSON.stringify({
         "account_type": "Mobile", 
         "account_id": phone
     })
     let customer_update = JSON.stringify({"name": nick})
-    let url = "https://open.youzan.com/api/oauthentry/youzan.scrm.customer/3.0.0/update?access_token="+ tokenData.token + '&account='+account + '&customer_update='+customer_update
-    return await axios.post(url)
+    let url = "https://open.youzan.com/api/oauthentry/youzan.scrm.customer/3.0.0/update?access_token="+ token + '&account='+account + '&customer_update='+customer_update
+    return  axios.post(encodeURI(url))
 }
 
 async function getJf(phone) {
-    let tokenData = await getToken() 
+    let tokenData = await getToken()
     let url = "https://open.youzan.com/api/oauthentry/youzan.crm.fans.points/3.0.1/get?access_token="+ tokenData.token + "&mobile=" + phone
     return await axios.get(url)
 }

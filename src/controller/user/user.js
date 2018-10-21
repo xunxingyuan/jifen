@@ -27,7 +27,7 @@ module.exports = {
                     Json.res(ctx, 201, '用户信息不完整')
                 } else {
                     let jifen = await Youzan.getJfnumber(userInfo[0].phone)
-                    if(jifen.data.response){
+                    if (jifen.data.response) {
                         Json.res(ctx, 200, '成功', {
                             nick: userInfo[0].nick,
                             phone: userInfo[0].phone,
@@ -37,7 +37,7 @@ module.exports = {
                             address: userInfo[0].address,
                             point: jifen.data.response.point
                         })
-                    }else{
+                    } else {
                         Json.res(ctx, 200, '成功', {
                             nick: userInfo[0].nick,
                             phone: userInfo[0].phone,
@@ -47,8 +47,6 @@ module.exports = {
                             address: userInfo[0].address
                         })
                     }
-
-                    
                 }
             } catch (error) {
                 Json.res(ctx, 201, '用户不存在')
@@ -73,22 +71,20 @@ module.exports = {
                     areaName: query.areaName,
                     address: query.address
                 }
-                let uploadData = {
-                    openid: user.openid,
-                    imgUpload: [],
-                    phone: query.phone,
-                    nick: query.nick
-                }
+
                 try {
-                    let userInfoSave = await new UserInfo(userData).save()
-                    let uploadSave = await new Upload(uploadData).save()
-                    let youzanResult = await Youzan.checkUser(query.phone,query.nick)
-                    
-                    if(userInfoSave&&uploadSave&&youzanResult){
-                        Json.res(ctx, 200, '成功')
+                    let youzanResult = await Youzan.checkUser(query.phone, query.nick)
+                    if(youzanResult.hasOwnProperty('response')&&youzanResult.response){
+                        let userInfoSave = await new UserInfo(userData).save()
+                        if (userInfoSave) {
+                            Json.res(ctx, 200, '成功')
+                        } else {
+                            Json.res(ctx, 201, '创建用户故障')
+                        }
                     }else{
                         Json.res(ctx, 201, '创建用户故障')
                     }
+                    
                 } catch (error) {
                     Json.res(ctx, 201, '用户系统错误')
                 }
@@ -124,12 +120,17 @@ module.exports = {
                     }, {
                             $set: userData
                         })
-                    let uploadUpdate = await Upload.updateOne({
+                    let uploadUpdate = await Upload.updateMany({
                         openid: user.openid
                     }, {
                             $set: uploadData
-                        })
-                    Json.res(ctx, 200, '成功')
+                    })
+                    if (userInfoSave && uploadUpdate) {
+                        Json.res(ctx, 200, '成功')
+                    } else {
+                        Json.res(ctx, 201, '更新失败')
+                    }
+
                 } catch (error) {
                     Json.res(ctx, 201, '用户系统错误')
                 }
@@ -143,7 +144,7 @@ module.exports = {
     uploadImg: async (ctx, next) => {
         let query = ctx.request.body
         let now = new Date().getTime()
-        if (query.id && query.lists) {
+        if (query.id && query.lists && query.feeling) {
 
             try {
                 let user = await User.findOne({
@@ -154,29 +155,30 @@ module.exports = {
                     let wxMsg = await Wx.findOne({
                         id: '1'
                     })
-                    let imgUploadData = [{
-                        updateTime: now,
-                        uploadId: now + '_' + Math.floor(Math.random() * 1000),
-                        serverIdList: src,
-                        srcList: [],
+                    let userInfo = await UserInfo.findOne({
+                        openid: user.openid
+                    })
+
+                    let uploadItem = {
+                        openid: user.openid,
+                        phone: userInfo.phone,
+                        nick: userInfo.nick,
+                        feeling: query.feeling,
+                        imgList: [],
+                        serveIdlist: src,
+                        uploadTime: now,
                         status: 0
-                    }]
+                    }
 
                     try {
                         let result = await getImgFromWx(wxMsg.accessToken, src)
                         console.log(result)
                         result.forEach((e) => {
-                            e = Conf.url + e
-                            imgUploadData[0].srcList.push(e)
+                            e = Conf.server.url + e
+                            uploadItem.imgList.push(e)
                         })
                         try {
-                            let uploadResult = await Upload.updateOne({
-                                openid: user.openid
-                            }, {
-                                    $addToSet: {
-                                        imgUpload: imgUploadData
-                                    }
-                                })
+                            let uploadResult = await new Upload(uploadItem).save()
                             Wechat.sendMessage(wxMsg.accessToken, user.openid, {
                                 tip: '亲爱的伙伴，感谢您参与本次活动，我们已经收到了您上传的截图，并将在五个工作日内完成图片审核及配送积分。',
                                 name: '晒图赚积分',
@@ -185,10 +187,13 @@ module.exports = {
                             }, 'PHLimwrzsk2FY0_0PehumvZ2bZMZW30R4yExv6aDI1I').then((res) => {
                                 console.log(res)
                             })
-                            Json.res(ctx, 200, '上传成功')
-
+                            if (uploadResult) {
+                                Json.res(ctx, 200, '上传成功')
+                            } else {
+                                Json.res(ctx, 201, '用户上传保存1失败')
+                            }
                         } catch (error) {
-                            Json.res(ctx, 201, '用户上传保存1失败')
+                            Json.res(ctx, 201, '用户上传保存失败')
                         }
 
                     } catch (error) {
@@ -217,12 +222,41 @@ module.exports = {
         //     Json.res(ctx, 201, '失败')
         // }
         let query = ctx.request.query
-        // let result = await Youzan.checkUser(query.phone,query.nick)
+        let result = await Youzan.checkUser(query.phone,query.nick)
         // let result = await Youzan.getJfnumber(query.phone)
-        let result = await Youzan.addJfnumber(query.phone,10)
-        Json.res(ctx, 200, '成功',{
-            result: result.data
-        })
+        // let result = await Youzan.addJfnumber(query.phone, 10)
+        console.log(result)
+        Json.res(ctx, 200, '成功')
+    },
+    getUserUpload: async (ctx, next) => {
+        let query = ctx.request.query
+        if (query.id) {
+            try {
+                let user = await User.findOne({
+                    _id: query.id
+                })
+                let userUpload = await Upload.find({
+                    openid: user.openid
+                })
+                if (userUpload) {
+                    // let resData = {
+                    //     imgUpload: userUpload.imgUpload,
+                    //     nick: userUpload.nick,
+                    //     phone: userUpload.phone
+                    // }
+                    Json.res(ctx, 200, '获取成功', {
+                        list: userUpload
+                    })
+                } else {
+                    Json.res(ctx, 201, '查找失败')
+                }
+
+            } catch (error) {
+                Json.res(ctx, 201, '查找失败')
+            }
+        } else {
+            Json.res(ctx, 201, '参数不完整')
+        }
     }
 }
 
@@ -244,7 +278,7 @@ function getImgFromWx(token, lists) {
                     let imgPath = "/" + now + '.jpg'
                     res.data.pipe(fs.createWriteStream(process.cwd() + "/static/imgSrc" + imgPath))
                     all += 1
-                    srcList.push("/static/imgSrc" + imgPath)
+                    srcList.push("/imgSrc" + imgPath)
                     if (all === flag) {
                         console.log(srcList)
                         resolve(srcList)
@@ -258,4 +292,3 @@ function getImgFromWx(token, lists) {
 
     })
 }
-

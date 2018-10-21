@@ -105,40 +105,45 @@ module.exports = {
                     _id: query.id
                 })
                 console.log(user)
-                if (user.expires_time > now) {
-                    Json.res(ctx, 200, '成功')
-                } else {
-                    let refreshUrl = "https://api.weixin.qq.com/sns/oauth2/refresh_token?appid=" + APPID + "&grant_type=refresh_token&refresh_token=" + user.refresh_token
-                    let refreshResult = await axios.get(refreshUrl)
-                    if (refreshResult.status === 200) {
-                        if (refreshResult.data.hasOwnProperty('access_token')) {
-                            let refreshData = {
-                                access_token: refreshResult.data.access_token,
-                                expires_time: now + refreshResult.data.expires_in * 1000,
-                                refresh_token: refreshResult.data.refresh_token,
-                                scope: refreshResult.data.scope
-                            }
-                            try {
-                                let refreshUser = await User.updateOne({
-                                    openid: refreshResult.data.openid
-                                }, {
-                                        $set: refreshData
-                                    })
-                                if (refreshUser) {
-                                    Json.res(ctx, 200, '成功')
-                                } else {
-                                    Json.res(ctx, 201, '更新用户失败')
+                if(user){
+                    if (user.expires_time > now) {
+                        Json.res(ctx, 200, '成功')
+                    } else {
+                        let refreshUrl = "https://api.weixin.qq.com/sns/oauth2/refresh_token?appid=" + APPID + "&grant_type=refresh_token&refresh_token=" + user.refresh_token
+                        let refreshResult = await axios.get(refreshUrl)
+                        if (refreshResult.status === 200) {
+                            if (refreshResult.data.hasOwnProperty('access_token')) {
+                                let refreshData = {
+                                    access_token: refreshResult.data.access_token,
+                                    expires_time: now + refreshResult.data.expires_in * 1000,
+                                    refresh_token: refreshResult.data.refresh_token,
+                                    scope: refreshResult.data.scope
                                 }
-                            } catch (error) {
-                                Json.res(ctx, 201, '数据查找错误')
+                                try {
+                                    let refreshUser = await User.updateOne({
+                                        openid: refreshResult.data.openid
+                                    }, {
+                                            $set: refreshData
+                                        })
+                                    if (refreshUser) {
+                                        Json.res(ctx, 200, '成功')
+                                    } else {
+                                        Json.res(ctx, 201, '更新用户失败')
+                                    }
+                                } catch (error) {
+                                    Json.res(ctx, 201, '数据查找错误')
+                                }
+                            } else {
+                                Json.res(ctx, 201, '获取token失败')
                             }
                         } else {
-                            Json.res(ctx, 201, '获取token失败')
+                            Json.res(ctx, 201, '刷新token失败')
                         }
-                    } else {
-                        Json.res(ctx, 201, '刷新token失败')
                     }
+                }else{
+                    Json.res(ctx, 201, '用户查找错误')
                 }
+                
             } catch (error) {
                 Json.res(ctx, 201, '数据查找错误')
             }

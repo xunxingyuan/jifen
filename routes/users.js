@@ -20,6 +20,9 @@ router.post('/uploadImg', async (ctx, next) => {
   return User.uploadImg(ctx,next)
 })
 
+router.get('/getUpload', async (ctx, next) => {
+  return User.getUserUpload(ctx,next)
+})
 
 router.get('/testImg', async (ctx, next) => {
   return User.testGetFile(ctx,next)

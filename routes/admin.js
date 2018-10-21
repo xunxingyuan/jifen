@@ -20,5 +20,9 @@ router.get('/getUploadList', async (ctx, next) => {
     return Admin.getUploadList(ctx, next)
 })
 
+router.get('/getJf', async (ctx, next) => {
+    return Admin.getJf(ctx, next)
+})
+
 
 module.exports = router
