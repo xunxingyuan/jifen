@@ -186,8 +186,7 @@ module.exports = {
                 }
                 // let tokenUrl = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=' + res.appID + '&secret=' + res.appsecret
                 let tokenResult = await axios.get(tokenUrl)
-                if (tokenResult.status === 200) {
-                    let ticketUrl = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=" + ACCESS_TOKEN + "&type=jsapi"
+                let ticketUrl = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=" + ACCESS_TOKEN + "&type=jsapi"
                     let ticketResult = await axios.get(ticketUrl)
 
                     if (ticketResult.status === 200) {
@@ -214,9 +213,6 @@ module.exports = {
                     } else {
                         Json.res(ctx, 201, '失败')
                     }
-                } else {
-                    Json.res(ctx, 201, '失败')
-                }
             }
         } else {
             Json.res(ctx, 201, '失败')
