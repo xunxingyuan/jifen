@@ -83,7 +83,7 @@ module.exports = {
 
                             let userAdd = await new User(userData).save()
                             let infoAdd = await new UserInfo(userInfoData).save()
-                            if (userAdd&&infoAdd) {
+                            if (userAdd && infoAdd) {
                                 Json.res(ctx, 200, '新建成功', {
                                     id: userAdd._id
                                 })
@@ -118,7 +118,7 @@ module.exports = {
                     _id: query.id
                 })
                 console.log(user)
-                if(user){
+                if (user) {
                     if (user.expires_time > now) {
                         Json.res(ctx, 200, '成功')
                     } else {
@@ -153,10 +153,10 @@ module.exports = {
                             Json.res(ctx, 201, '刷新token失败')
                         }
                     }
-                }else{
+                } else {
                     Json.res(ctx, 201, '用户查找错误')
                 }
-                
+
             } catch (error) {
                 Json.res(ctx, 201, '数据查找错误')
             }
@@ -181,38 +181,38 @@ module.exports = {
             } else {
                 let getToken = await axios.get('http://yjl.ty6068.com/CJAPI/CJSys/AccessTokenHandler')
                 let ACCESS_TOKEN
-                if(getToken.data.Status){
+                if (getToken.data.Status) {
                     ACCESS_TOKEN = getToken.data.Data.access_token
                 }
                 // let tokenUrl = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=' + res.appID + '&secret=' + res.appsecret
-                let tokenResult = await axios.get(tokenUrl)
+                // let tokenResult = await axios.get(tokenUrl)
                 let ticketUrl = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=" + ACCESS_TOKEN + "&type=jsapi"
-                    let ticketResult = await axios.get(ticketUrl)
+                let ticketResult = await axios.get(ticketUrl)
 
-                    if (ticketResult.status === 200) {
-                        let tokenData = {
-                            "accessToken": ACCESS_TOKEN,
-                            "accessToken_expires": 0,
-                            "ticket": ticketResult.data.ticket,
-                            "ticket_expires": now + ticketResult.data.expires_in * 1000
-                        }
-                        let tokenUpdate = await Wx.updateOne({
-                            id: '1'
-                        }, {
-                                $set: tokenData
-                            })
-                        let sighResult = sign(ticketResult.data.ticket, query.url)
-                        sighResult.appid = res.appID
-                        if (tokenUpdate) {
-                            Json.res(ctx, 200, '更新成功', {
-                                sign: sighResult
-                            })
-                        } else {
-                            Json.res(ctx, 201, '失败')
-                        }
+                if (ticketResult.status === 200) {
+                    let tokenData = {
+                        "accessToken": ACCESS_TOKEN,
+                        "accessToken_expires": 0,
+                        "ticket": ticketResult.data.ticket,
+                        "ticket_expires": now + ticketResult.data.expires_in * 1000
+                    }
+                    let tokenUpdate = await Wx.updateOne({
+                        id: '1'
+                    }, {
+                            $set: tokenData
+                        })
+                    let sighResult = sign(ticketResult.data.ticket, query.url)
+                    sighResult.appid = res.appID
+                    if (tokenUpdate) {
+                        Json.res(ctx, 200, '更新成功', {
+                            sign: sighResult
+                        })
                     } else {
                         Json.res(ctx, 201, '失败')
                     }
+                } else {
+                    Json.res(ctx, 201, '失败')
+                }
             }
         } else {
             Json.res(ctx, 201, '失败')
