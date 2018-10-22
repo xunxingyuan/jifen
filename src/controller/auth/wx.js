@@ -179,16 +179,21 @@ module.exports = {
                     sign: sighResultfirst
                 })
             } else {
-                let tokenUrl = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=' + res.appID + '&secret=' + res.appsecret
+                let getToken = await axios.get('http://yjl.ty6068.com/CJAPI/CJSys/AccessTokenHandler')
+                let ACCESS_TOKEN
+                if(getToken.data.Status){
+                    ACCESS_TOKEN = getToken.data.Data.access_token
+                }
+                // let tokenUrl = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=' + res.appID + '&secret=' + res.appsecret
                 let tokenResult = await axios.get(tokenUrl)
                 if (tokenResult.status === 200) {
-                    let ticketUrl = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=" + tokenResult.data.access_token + "&type=jsapi"
+                    let ticketUrl = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=" + ACCESS_TOKEN + "&type=jsapi"
                     let ticketResult = await axios.get(ticketUrl)
 
                     if (ticketResult.status === 200) {
                         let tokenData = {
-                            "accessToken": tokenResult.data.access_token,
-                            "accessToken_expires": now + tokenResult.data.expires_in * 1000,
+                            "accessToken": ACCESS_TOKEN,
+                            "accessToken_expires": 1000000000000000,
                             "ticket": ticketResult.data.ticket,
                             "ticket_expires": now + ticketResult.data.expires_in * 1000
                         }
