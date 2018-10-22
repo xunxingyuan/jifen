@@ -4,7 +4,12 @@ const axios = require('axios')
 //通知用户上传成功 
 
 module.exports = {
-    sendMessage: (ACCESS_TOKEN, OPENID, sendData, template_id) =>{
+    sendMessage: async (OPENID, sendData, template_id) => {
+        let getToken = await axios.get('http://yjl.ty6068.com/CJAPI/CJSys/AccessTokenHandler')
+        let ACCESS_TOKEN
+        if(getToken.data.Status){
+            ACCESS_TOKEN = getToken.data.Data.access_token
+        }
         let data = {
             "touser": OPENID,
             "template_id": template_id,

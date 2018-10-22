@@ -7,6 +7,7 @@ const mySchema = new Schema({
     accessToken: String,
     accessToken_expires: Number,
     ticket: String,
-    ticket_expires: Number
+    ticket_expires: Number,
+    uploadLimit: Number
 },{ collection: 'wx' })
 module.exports = mySchema

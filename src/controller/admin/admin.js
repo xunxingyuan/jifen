@@ -136,7 +136,7 @@ module.exports = {
                         if(checkResult){
                             Wechat.sendMessage(wxMsg.accessToken, uploadItem.openid, {
                                 tip: '亲爱的伙伴，感谢您参与本次活动，您上传的截图已经审核通过，积分已经自动更新到您的账户。',
-                                name: '晒图赚积分',
+                                name: '素人种草',
                                 time: new Date().toLocaleString(),
                                 intro: '审核成功，请持续关注哦~如有更多心得分享，请点击详情进行上传。'
                             }, 'VnxQbsEQHU3whNzj28EGBYC77Vi6bta1pHgPR59SH_E').then((res) => {
@@ -158,7 +158,7 @@ module.exports = {
                     if(checkResult){
                         Wechat.sendMessage(wxMsg.accessToken, uploadItem.openid, {
                             tip: '您上传的图片未通过审核，请在各大平台（如微博、微信朋友圈、小红书等）晒出您的对我们产品的使用评价，并截图上传；重复上传，上传他人图片都会被判定审核失败',
-                            name: '晒图赚积分',
+                            name: '素人种草',
                             time: new Date().toLocaleString(),
                             intro: '快点击详情正确晒图吧，赢得更多积分大奖。'
                         }, 'VnxQbsEQHU3whNzj28EGBYC77Vi6bta1pHgPR59SH_E').then((res) => {
@@ -200,5 +200,34 @@ module.exports = {
             Json.res(ctx,201,'获取失败，稍后请重试')
         }
         
+    },
+    //限制次数
+    setLimt: async (ctx,next)=>{
+        let query = ctx.request.query
+        let save = await Wx.updateOne({
+            id: '1'
+        },{
+            $set: {
+                uploadLimit: query.limit
+            }
+        })
+        if(save){
+            Json.res(ctx,200,'保存成功')
+        }else{
+            Json.res(ctx,201,'保存失败')
+        }
+    },
+    //获取次数限制
+    getLimt: async (ctx,next)=>{
+        let result = await Wx.findOne({
+            id: '1'
+        })
+        if(result){
+            Json.res(ctx,200,'获取成功',{
+                limit: result.uploadLimit
+            })
+        }else{
+            Json.res(ctx,201,'获取失败')
+        }
     }
 }

@@ -24,5 +24,12 @@ router.get('/getJf', async (ctx, next) => {
     return Admin.getJf(ctx, next)
 })
 
+router.get('/getLimit', async (ctx, next) => {
+    return Admin.getLimt(ctx, next)
+})
+
+router.get('/setLimit', async (ctx, next) => {
+    return Admin.setLimt(ctx, next)
+})
 
 module.exports = router

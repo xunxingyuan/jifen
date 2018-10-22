@@ -26,7 +26,7 @@ module.exports = {
                 if (userInfo.length === 0) {
                     Json.res(ctx, 201, '用户信息不完整')
                 } else {
-                    if(userInfo[0].phone){
+                    if (userInfo[0].phone) {
                         let jifen = await Youzan.getJfnumber(userInfo[0].phone)
                         if (jifen.data.response) {
                             Json.res(ctx, 200, '成功', {
@@ -48,7 +48,7 @@ module.exports = {
                                 address: userInfo[0].address
                             })
                         }
-                    }else{
+                    } else {
                         Json.res(ctx, 200, '成功', {
                             nick: userInfo[0].nick,
                             phone: userInfo[0].phone,
@@ -83,7 +83,7 @@ module.exports = {
                     areaName: query.areaName,
                     address: query.address
                 }
-            
+
 
                 try {
                     let youzanResult = await Youzan.checkUser(query.phone, query.nick)
@@ -145,7 +145,7 @@ module.exports = {
                         } else {
                             Json.res(ctx, 201, '更新失败')
                         }
-    
+
                     } catch (error) {
                         Json.res(ctx, 201, '用户系统错误')
                     }
@@ -156,7 +156,7 @@ module.exports = {
                 Json.res(ctx, 201, '创建用户故障')
             }
 
-            
+
         } else {
             Json.res(ctx, 201, '参数不完整')
         }
@@ -164,64 +164,87 @@ module.exports = {
     uploadImg: async (ctx, next) => {
         let query = ctx.request.body
         let now = new Date().getTime()
+
         if (query.id && query.lists && query.feeling) {
 
             try {
                 let user = await User.findOne({
                     _id: query.id
                 })
-                try {
-                    let src = JSON.parse(query.lists)
-                    let wxMsg = await Wx.findOne({
-                        id: '1'
-                    })
-                    let userInfo = await UserInfo.findOne({
-                        openid: user.openid
-                    })
+                let limit = await Wx.findOne({
+                    id: '1'
+                })
+                let timeGet = new Date()
+                timeGet.setDate(1)
+                timeGet.setHours(0, 0, 0, 0)
+                let monthStart = timeGet.getTime()
+                timeGet.setMonth(new Date().getMonth() + 1)
+                let monthEnd = timeGet.getTime()
 
-                    let uploadItem = {
-                        openid: user.openid,
-                        phone: userInfo.phone,
-                        nick: userInfo.nick,
-                        feeling: query.feeling,
-                        imgList: [],
-                        serveIdlist: src,
-                        uploadTime: now,
-                        status: 0
-                    }
-
+                let countUpload = await Upload.find({
+                    openid: user.openid,
+                    uploadTime: {"$gt":monthStart, "$lte":monthEnd}
+                })
+                if(countUpload.length<limit.uploadLimit){
                     try {
-                        let result = await getImgFromWx(wxMsg.accessToken, src)
-                        console.log(result)
-                        result.forEach((e) => {
-                            e = Conf.server.url + e
-                            uploadItem.imgList.push(e)
+                        let src = JSON.parse(query.lists)
+                        let wxMsg = await Wx.findOne({
+                            id: '1'
                         })
+                        let userInfo = await UserInfo.findOne({
+                            openid: user.openid
+                        })
+    
+                        let uploadItem = {
+                            openid: user.openid,
+                            phone: userInfo.phone,
+                            nick: userInfo.nick,
+                            feeling: query.feeling,
+                            imgList: [],
+                            serveIdlist: src,
+                            uploadTime: now,
+                            status: 0
+                        }
+    
                         try {
-                            let uploadResult = await new Upload(uploadItem).save()
-                            Wechat.sendMessage(wxMsg.accessToken, user.openid, {
-                                tip: '亲爱的伙伴，感谢您参与本次活动，我们已经收到了您上传的截图，并将在五个工作日内完成图片审核及配送积分。',
-                                name: '晒图赚积分',
-                                time: new Date().toLocaleString(),
-                                intro: '审核成功后积分将自动更新到您的账户，请持续关注哦~如有更多心得分享，请点击详情进行上传。'
-                            }, 'VnxQbsEQHU3whNzj28EGBYC77Vi6bta1pHgPR59SH_E').then((res) => {
-                                console.log(res)
+                            let result = await getImgFromWx(wxMsg.accessToken, src)
+                            console.log(result)
+                            result.forEach((e) => {
+                                e = Conf.server.url + e
+                                uploadItem.imgList.push(e)
                             })
-                            if (uploadResult) {
-                                Json.res(ctx, 200, '上传成功')
-                            } else {
-                                Json.res(ctx, 201, '用户上传保存1失败')
+                            try {
+                                let uploadResult = await new Upload(uploadItem).save()
+                                Wechat.sendMessage(wxMsg.accessToken, user.openid, {
+                                    tip: '亲爱的伙伴，感谢您参与本次活动，我们已经收到了您上传的截图，并将在五个工作日内完成图片审核及配送积分。',
+                                    name: '素人种草',
+                                    time: new Date().toLocaleString(),
+                                    intro: '审核成功后积分将自动更新到您的账户，请持续关注哦~如有更多心得分享，请点击详情进行上传。'
+                                }, 'VnxQbsEQHU3whNzj28EGBYC77Vi6bta1pHgPR59SH_E').then((res) => {
+                                    console.log(res)
+                                })
+                                if (uploadResult) {
+                                    Json.res(ctx, 200, '上传成功')
+                                } else {
+                                    Json.res(ctx, 201, '用户上传保存1失败')
+                                }
+                            } catch (error) {
+                                Json.res(ctx, 201, '用户上传保存失败')
                             }
+    
                         } catch (error) {
                             Json.res(ctx, 201, '用户上传保存失败')
                         }
-
                     } catch (error) {
-                        Json.res(ctx, 201, '用户上传保存失败')
+                        Json.res(ctx, 201, '用户上传不存在')
                     }
-                } catch (error) {
-                    Json.res(ctx, 201, '用户上传不存在')
+                }else{
+                    Json.res(ctx, 202, '当月上传已经达到最大次数')
                 }
+
+
+
+                
 
             } catch (error) {
                 Json.res(ctx, 201, '用户不存在')
