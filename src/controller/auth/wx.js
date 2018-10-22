@@ -193,7 +193,7 @@ module.exports = {
                     if (ticketResult.status === 200) {
                         let tokenData = {
                             "accessToken": ACCESS_TOKEN,
-                            "accessToken_expires": 1000000000000000,
+                            "accessToken_expires": 0,
                             "ticket": ticketResult.data.ticket,
                             "ticket_expires": now + ticketResult.data.expires_in * 1000
                         }
