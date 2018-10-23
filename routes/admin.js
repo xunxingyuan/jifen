@@ -32,4 +32,12 @@ router.get('/setLimit', async (ctx, next) => {
     return Admin.setLimt(ctx, next)
 })
 
+router.get('/notice',async (ctx, next) => {
+    return Admin.getNotice(ctx, next)
+})
+
+router.get('/noticeSet',async (ctx, next) => {
+    return Admin.setNotice(ctx, next)
+})
+
 module.exports = router

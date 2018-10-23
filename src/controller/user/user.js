@@ -216,11 +216,11 @@ module.exports = {
                             try {
                                 let uploadResult = await new Upload(uploadItem).save()
                                 Wechat.sendMessage(wxMsg.accessToken, user.openid, {
-                                    tip: '亲爱的伙伴，感谢您参与本次活动，我们已经收到了您上传的截图，并将在五个工作日内完成图片审核及配送积分。',
-                                    name: '素人种草',
-                                    time: new Date().toLocaleString(),
-                                    intro: '审核成功后积分将自动更新到您的账户，请持续关注哦~如有更多心得分享，请点击详情进行上传。'
-                                }, 'VnxQbsEQHU3whNzj28EGBYC77Vi6bta1pHgPR59SH_E').then((res) => {
+                                    first: wxMsg.uploadSuccess,
+                                    keyword1: wxMsg.activeName,
+                                    keyword2: new Date().toLocaleString(),
+                                    remark: wxMsg.uploadBottom
+                                }, '9zta7_Z_3ZGOUPI2MCqjSYdhXfHqU93epzmAo4wU8tg').then((res) => {
                                     console.log(res)
                                 })
                                 if (uploadResult) {

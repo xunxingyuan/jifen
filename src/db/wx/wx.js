@@ -8,6 +8,13 @@ const mySchema = new Schema({
     accessToken_expires: Number,
     ticket: String,
     ticket_expires: Number,
-    uploadLimit: Number
+    uploadLimit: Number,
+    activeName: String,
+    uploadSuccess : String,
+    uploadBottom : String,
+    confirmFail : String,
+    confirmFailBottom : String,
+    comfirmSuccess : String,
+    comfirmSuccessBottom : String
 },{ collection: 'wx' })
 module.exports = mySchema
