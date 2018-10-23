@@ -13,22 +13,22 @@ module.exports = {
         let data = {
             "touser": OPENID,
             "template_id": template_id,
-            "url": Conf.url + '/jifen',
+            "url": Conf.server.url + '/jifen',
             "data": {
-                "tip": {
-                    "value": sendData.tip,
+                "first": {
+                    "value": sendData.first,
                     "color": "#173177"
                 },
-                "name": {
-                    "value": sendData.name,
+                "keyword1": {
+                    "value": sendData.keyword1,
                     "color": "#173177"
                 },
-                "time": {
-                    "value": sendData.time,
+                "keyword2": {
+                    "value": sendData.keyword2,
                     "color": "#173177"
                 },
-                "intro": {
-                    "value": sendData.intro,
+                "remark": {
+                    "value": sendData.remark,
                     "color": "#173177"
                 }
             }
