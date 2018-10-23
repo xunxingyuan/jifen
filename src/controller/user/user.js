@@ -215,7 +215,7 @@ module.exports = {
                             })
                             try {
                                 let uploadResult = await new Upload(uploadItem).save()
-                                Wechat.sendMessage(wxMsg.accessToken, user.openid, {
+                                Wechat.sendMessage(user.openid, {
                                     first: wxMsg.uploadSuccess,
                                     keyword1: wxMsg.activeName,
                                     keyword2: new Date().toLocaleString(),
