@@ -126,29 +126,47 @@ module.exports = {
             try {
 
                 if (query.type == 0) {
-                    let addResult = await Youzan.addJfnumber(uploadItem.phone, 100)
-                    if (addResult.data.response && addResult.data.response.is_success) {
-                        let checkResult = await Upload.updateOne({
-                            _id: query.id
-                        }, {
-                                $set: updateData
-                            })
-                        if (checkResult) {
-                            Wechat.sendMessage(uploadItem.openid, {
-                                first: wxMsg.comfirmSuccess,
-                                keyword1: wxMsg.activeName,
-                                keyword2: new Date().toLocaleString(),
-                                remark: wxMsg.comfirmSuccessBottom
-                            }, '9zta7_Z_3ZGOUPI2MCqjSYdhXfHqU93epzmAo4wU8tg').then((res) => {
-                                console.log(res)
-                            })
-                            Json.res(ctx, 200, '审核成功')
-                        } else {
-                            Json.res(ctx, 201, '审核失败，稍后重试')
-                        }
+                    let checkResult = await Upload.updateOne({
+                        _id: query.id
+                    }, {
+                            $set: updateData
+                        })
+                    if (checkResult) {
+                        Wechat.sendMessage(uploadItem.openid, {
+                            first: wxMsg.comfirmSuccess,
+                            keyword1: wxMsg.activeName,
+                            keyword2: new Date().toLocaleString(),
+                            remark: wxMsg.comfirmSuccessBottom
+                        }, '9zta7_Z_3ZGOUPI2MCqjSYdhXfHqU93epzmAo4wU8tg').then((res) => {
+                            console.log(res)
+                        })
+                        Json.res(ctx, 200, '审核成功')
                     } else {
-                        Json.res(ctx, 201, '积分新增失败，稍后重试')
+                        Json.res(ctx, 201, '审核失败，稍后重试')
                     }
+                    // let addResult = await Youzan.addJfnumber(uploadItem.phone, 100)
+                    // if (addResult.data.response && addResult.data.response.is_success) {
+                    //     let checkResult = await Upload.updateOne({
+                    //         _id: query.id
+                    //     }, {
+                    //             $set: updateData
+                    //         })
+                    //     if (checkResult) {
+                    //         Wechat.sendMessage(uploadItem.openid, {
+                    //             first: wxMsg.comfirmSuccess,
+                    //             keyword1: wxMsg.activeName,
+                    //             keyword2: new Date().toLocaleString(),
+                    //             remark: wxMsg.comfirmSuccessBottom
+                    //         }, '9zta7_Z_3ZGOUPI2MCqjSYdhXfHqU93epzmAo4wU8tg').then((res) => {
+                    //             console.log(res)
+                    //         })
+                    //         Json.res(ctx, 200, '审核成功')
+                    //     } else {
+                    //         Json.res(ctx, 201, '审核失败，稍后重试')
+                    //     }
+                    // } else {
+                    //     Json.res(ctx, 201, '积分新增失败，稍后重试')
+                    // }
                 } else {
                     let checkResult = await Upload.updateOne({
                         _id: query.id
