@@ -172,7 +172,7 @@ module.exports = {
         })
         let now = new Date().getTime()
         if (res && query.url) {
-            if (res.accessToken_expires > now) {
+            if (res.ticket_expires > now) {
                 let sighResultfirst = sign(res.ticket, query.url)
                 sighResultfirst.appid = res.appID
                 Json.res(ctx, 200, '更新成功', {
