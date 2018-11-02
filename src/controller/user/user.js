@@ -372,17 +372,17 @@ function getImgFromWx(token, lists) {
             })
                 .then(res => {
                     let now = new Date().getTime() + '_' + Math.floor(Math.random() * 1000)
-                    let type = res.content_type
-                    type = type.relace('image/','')
-                    if(type == 'png'||type=='jpeg'||type == 'gif'||type == 'bmp'){
+                    // let type = res.content_type
+                    // type = type.relace('image/','')
+                    // if(type == 'png'||type=='jpeg'||type == 'gif'||type == 'bmp'){
 
-                    }else if(type == 'jpeg'||type == 'x-icon'){
-                        type = 'jpg'
-                    }else{
-                        type = 'jpg'
-                    }
-                    let imgPath = "/" + now + '.' + type
-                    // let imgPath = "/" + now + '.jpg'
+                    // }else if(type == 'jpeg'||type == 'x-icon'){
+                    //     type = 'jpg'
+                    // }else{
+                    //     type = 'jpg'
+                    // }
+                    // let imgPath = "/" + now + '.' + type
+                    let imgPath = "/" + now + '.jpg'
                     res.data.pipe(fs.createWriteStream(process.cwd() + "/static/imgSrc" + imgPath))
                     all += 1
                     srcList.push("/imgSrc" + imgPath)
