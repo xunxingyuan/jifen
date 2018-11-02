@@ -259,9 +259,14 @@ module.exports = {
                             uploadTime: now,
                             status: 0
                         }
+                        let getToken = await axios.get('http://yjl.ty6068.com/CJAPI/CJSys/AccessTokenHandler')
+                        let ACCESS_TOKEN
+                        if (getToken.data.Status) {
+                            ACCESS_TOKEN = getToken.data.Data.access_token
+                        }
 
                         try {
-                            let result = await getImgFromWx(wxMsg.accessToken, src)
+                            let result = await getImgFromWx(ACCESS_TOKEN, src)
                             console.log(result)
                             result.forEach((e) => {
                                 e = Conf.server.url + e
