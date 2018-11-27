@@ -6,6 +6,14 @@ router.get('/getAuth', async (ctx, next) => {
   return wx.getCode(ctx, next)
 })
 
+router.get('/getInfoAuth',async (ctx,next) =>{
+  return wx.getInfoCode(ctx,next)
+})
+
+router.get('/getInfoToken',async (ctx,next)=>{
+  return wx.getTokenAuth(ctx,next)
+})
+
 router.get('/getToken', async (ctx, next) => {
   return wx.getToken(ctx, next)
 })

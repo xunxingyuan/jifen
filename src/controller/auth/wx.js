@@ -6,6 +6,7 @@ const axios = require('axios')
 const sign = require('../../tools/sign')
 const Conf = require('../../../conf/conf')
 const UserInfo = db.UserInfo
+const userAuth = db.userAuth
 
 module.exports = {
     getCode: async (ctx, next) => {
@@ -41,7 +42,121 @@ module.exports = {
     },
 
     //职业测试用户
-    
+    getTokenAuth: async (ctx, next) => {
+        let res = await Wx.findOne({
+            id: '1'
+        })
+        let query = ctx.request.query
+        if (query.code) {
+            if (res) {
+                let APPID = res.appID
+                let SECRET = res.appsecret
+                let now = new Date().getTime()
+                let url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=" + APPID + "&secret=" + SECRET + "&code=" + query.code + "&grant_type=authorization_code"
+                let response = await axios.get(url)
+                if (response.status === 200) {
+                    if (response.data.hasOwnProperty('access_token')) {
+                        let user = await User.findOne({
+                            openid: response.data.openid
+                        })
+                        if (user) {
+                            let refreshData = {
+                                access_token: response.data.access_token,
+                                expires_time: now + response.data.expires_in * 1000,
+                                refresh_token: response.data.refresh_token,
+                                scope: response.data.scope
+                            }
+                            let refreshUser = await User.updateOne({
+                                openid: response.data.openid
+                            }, {
+                                $set: refreshData
+                            })
+                            let infoFind = await userAuth.findOne({
+                                openid: response.data.openid
+                            })
+                            if(infoFind){
+                                if (refreshUser) {
+                                    Json.res(ctx, 200, '更新成功', {
+                                        id: user._id
+                                    })
+                                } else {
+                                    Json.res(ctx, 201, '更新用户失败')
+                                }
+                            }else{
+                                let infoUrl = "https://api.weixin.qq.com/sns/userinfo?access_token=" + response.data.access_token + "&openid=" + response.data.openid + "&lang=zh_CN"
+                                let responseInfo = await axios.get(infoUrl)
+                                if (responseInfo.status === 200) {
+                                    let data = responseInfo.data
+                                    let userInfoData = {
+                                        openid: data.openid,
+                                        nickname: data.nickname,
+                                        sex: data.sex,
+                                        province: data.province,
+                                        city: data.city,
+                                        country: data.country,
+                                        headimgurl: data.headimgurl
+                                    }
+                                    let infoAdd = await new userAuth(userInfoData).save()
+                                    if (infoAdd&&refreshUser) {
+                                        Json.res(ctx, 200, '新建用户信息成功', {
+                                            id: user._id
+                                        })
+                                    } else {
+                                        Json.res(ctx, 201, '更新用户数据失败')
+                                    }
+                                }else{
+                                    Json.res(ctx, 201, '获取微信用户数据失败')
+                                }
+                            }
+
+                        } else {
+                            let userData = {
+                                openid: response.data.openid,
+                                access_token: response.data.access_token,
+                                expires_time: now + response.data.expires_in * 1000,
+                                refresh_token: response.data.refresh_token,
+                                scope: response.data.scope
+                            }
+                            let infoUrl = "https://api.weixin.qq.com/sns/userinfo?access_token=" + response.data.access_token + "&openid=" + response.data.openid + "&lang=zh_CN"
+                            let responseInfo = await axios.get(infoUrl)
+
+                            if (responseInfo.status === 200) {
+                                let data = responseInfo.data
+                                let userInfoData = {
+                                    openid: data.openid,
+                                    nickname: data.nickname,
+                                    sex: data.sex,
+                                    province: data.province,
+                                    city: data.city,
+                                    country: data.country,
+                                    headimgurl: data.headimgurl
+                                }
+                                let infoAdd = await new userAuth(userInfoData).save()
+                                let userAdd = await new User(userData).save()
+                                if (userAdd && infoAdd) {
+                                    Json.res(ctx, 200, '新建成功', {
+                                        id: userAdd._id
+                                    })
+                                } else {
+                                    Json.res(ctx, 201, '更新用户数据失败')
+                                }
+                            }else{
+                                Json.res(ctx, 201, '获取微信用户数据失败')
+                            }
+
+                        }
+
+                    } else {
+                        Json.res(ctx, 201, '微信获取token错误')
+                    }
+                } else {
+                    Json.res(ctx, 201, '微信鉴权错误')
+                }
+            }
+        } else {
+            Json.res(ctx, 201, '参数不完整')
+        }
+    },
 
     //种草用户
     getToken: async (ctx, next) => {
@@ -73,8 +188,8 @@ module.exports = {
                             let refreshUser = await User.updateOne({
                                 openid: response.data.openid
                             }, {
-                                    $set: refreshData
-                                })
+                                $set: refreshData
+                            })
 
                             if (refreshUser) {
                                 Json.res(ctx, 200, '更新成功', {
@@ -156,8 +271,8 @@ module.exports = {
                                     let refreshUser = await User.updateOne({
                                         openid: refreshResult.data.openid
                                     }, {
-                                            $set: refreshData
-                                        })
+                                        $set: refreshData
+                                    })
                                     if (refreshUser) {
                                         Json.res(ctx, 200, '成功')
                                     } else {
@@ -219,8 +334,8 @@ module.exports = {
                     let tokenUpdate = await Wx.updateOne({
                         id: '1'
                     }, {
-                            $set: tokenData
-                        })
+                        $set: tokenData
+                    })
                     let sighResult = sign(ticketResult.data.ticket, query.url)
                     sighResult.appid = res.appID
                     if (tokenUpdate) {

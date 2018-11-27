@@ -3,6 +3,8 @@ const Wx = db.Wx
 const UserInfo = db.UserInfo
 const Upload = db.Upload
 const User = db.User
+const userAuth = db.userAuth
+
 const axios = require('axios')
 const Json = require('../../tools/jsonResponse')
 const fs = require('fs')
@@ -13,6 +15,36 @@ const Conf = require('../../../conf/conf')
 
 
 module.exports = {
+    checkAuthUser: async (ctx, next) =>{
+        let query = ctx.request.query
+        if (query.id) {
+            try{
+                let user = await User.findOne({
+                    _id: query.id
+                })
+                let userInfo = await userAuth.find({
+                    openid: user.openid
+                })
+                if (userInfo.length === 0) {
+                    Json.res(ctx, 201, '用户信息不完整')
+                } else {
+                    Json.res(ctx, 200, '成功', {
+                        nickname: userInfo[0].nickname,
+                        sex: userInfo[0].sex,
+                        province: userInfo[0].province,
+                        city: userInfo[0].city,
+                        country: userInfo[0].country,
+                        headimgurl: userInfo[0].headimgurl
+                    })
+                }
+            }catch (error) {
+                Json.res(ctx, 201, '用户不存在')
+            }
+        }else{
+            Json.res(ctx, 201, '参数不完整')
+        }
+    },
+
     checkUser: async (ctx, next) => {
         let query = ctx.request.query
         if (query.id) {
@@ -35,39 +67,6 @@ module.exports = {
                         address: userInfo[0].address,
                         point: 0
                     })
-                    // if (userInfo[0].phone) {
-                    //     let jifen = await Youzan.getJfnumber(userInfo[0].phone)
-                    //     if (jifen.data.response) {
-                    //         Json.res(ctx, 200, '成功', {
-                    //             nick: userInfo[0].nick,
-                    //             phone: userInfo[0].phone,
-                    //             name: userInfo[0].name,
-                    //             areaCode: userInfo[0].areaCode,
-                    //             areaName: userInfo[0].areaName,
-                    //             address: userInfo[0].address,
-                    //             point: jifen.data.response.point
-                    //         })
-                    //     } else {
-                    //         Json.res(ctx, 200, '成功', {
-                    //             nick: userInfo[0].nick,
-                    //             phone: userInfo[0].phone,
-                    //             name: userInfo[0].name,
-                    //             areaCode: userInfo[0].areaCode,
-                    //             areaName: userInfo[0].areaName,
-                    //             address: userInfo[0].address
-                    //         })
-                    //     }
-                    // } else {
-                    //     Json.res(ctx, 200, '成功', {
-                    //         nick: userInfo[0].nick,
-                    //         phone: userInfo[0].phone,
-                    //         name: userInfo[0].name,
-                    //         areaCode: userInfo[0].areaCode,
-                    //         areaName: userInfo[0].areaName,
-                    //         address: userInfo[0].address,
-                    //         point: 0
-                    //     })
-                    // }
                 }
             } catch (error) {
                 Json.res(ctx, 201, '用户不存在')

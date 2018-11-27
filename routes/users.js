@@ -3,6 +3,9 @@ const User = require('../src/controller/user/user')
 
 router.prefix('/user')
 
+router.get('/checkAuthInfo',async (ctx,next)=>{
+  return User.checkAuthUser(ctx,next)
+})
 
 router.get('/checkInfo', async (ctx, next) => {
   return User.checkUser(ctx,next)

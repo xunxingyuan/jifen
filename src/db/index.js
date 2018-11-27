@@ -10,6 +10,8 @@ const options = {
 const userSchema = require('./user/user')
 const wxSchema = require('./wx/wx')
 const userInfoSchema = require('./user/userInfo')
+const userAuthSchema = require('./user/authuser')
+
 const uploadSchema = require('./user/upload')
 const youzanSchema = require('./youzan/youzan')
 
@@ -26,6 +28,8 @@ db.once('open', (callback) => {
 //导出model
 exports.User = mongoose.model('users',userSchema)
 exports.UserInfo = mongoose.model('userinfo',userInfoSchema)
+exports.userAuth = mongoose.model('userauth',userAuthSchema)
+
 exports.Upload = mongoose.model('upload',uploadSchema)
 exports.Wx = mongoose.model('wx',wxSchema)
 exports.Youzan = mongoose.model('youzan',youzanSchema)
