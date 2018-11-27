@@ -22,8 +22,28 @@ module.exports = {
         } else {
             Json.res(ctx, 201, '失败')
         }
-
     },
+    //获取用户个人信息CODE
+    getInfoCode: async (ctx, next) => {
+        let res = await Wx.findOne({
+            id: '1'
+        })
+        if (res) {
+            let APPID = res.appID
+            let redirect_uri = Conf.server.url + "/career"
+            let url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + APPID + "&redirect_uri=" + redirect_uri + "&response_type=code&scope=snsapi_userinfo&state=123#wechat_redirect"
+            Json.res(ctx, 200, '获取成功', {
+                url: url
+            })
+        } else {
+            Json.res(ctx, 201, '失败')
+        }
+    },
+
+    //职业测试用户
+    
+
+    //种草用户
     getToken: async (ctx, next) => {
         let res = await Wx.findOne({
             id: '1'
