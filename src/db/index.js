@@ -15,6 +15,10 @@ const userAuthSchema = require('./user/authuser')
 const uploadSchema = require('./user/upload')
 const youzanSchema = require('./youzan/youzan')
 
+const countSchema = require('./count/count')
+const countDetailSchema = require('./count/countDetail')
+
+
 //数据库认证
 let authUrl = "mongodb://"+ options.user + ':'+ options.pass + '@' + options.path
 mongoose.connect(authUrl,{ useNewUrlParser: true })
@@ -33,5 +37,9 @@ exports.userAuth = mongoose.model('userauth',userAuthSchema)
 exports.Upload = mongoose.model('upload',uploadSchema)
 exports.Wx = mongoose.model('wx',wxSchema)
 exports.Youzan = mongoose.model('youzan',youzanSchema)
+
+exports.Count = mongoose.model('count',countSchema)
+exports.CountDetail = mongoose.model('countdetail',countDetailSchema)
+
 
 
