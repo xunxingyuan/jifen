@@ -9,5 +9,9 @@ router.get('/enter',async (ctx,next)=>{
   return Count.enterPage(ctx,next)
 })
 
+router.get('/result',async (ctx,next)=>{
+  return Count.enterPage(ctx,next)
+})
+
 
 module.exports = router
