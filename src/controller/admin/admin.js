@@ -3,6 +3,10 @@ const Wx = db.Wx
 const Conf = require('../../../conf/conf')
 const UserInfo = db.UserInfo
 const Upload = db.Upload
+const Count = db.Count
+const CountDetail = db.CountDetail
+const CareerAuth = db.userAuth
+
 const User = db.User
 const Json = require('../../tools/jsonResponse')
 const fs = require('fs')
@@ -23,9 +27,17 @@ module.exports = {
             if (type == 0) {
                 search = {}
             } else if (type == 1) {
-                search = { nick: { $regex: reg } }
+                search = {
+                    nick: {
+                        $regex: reg
+                    }
+                }
             } else if (type == 2) {
-                search = { phone: { $regex: reg } }
+                search = {
+                    phone: {
+                        $regex: reg
+                    }
+                }
             }
             let userResult = await UserInfo.find(search).skip(page * 10).limit(10)
             let totalData = await UserInfo.find(search)
@@ -64,38 +76,97 @@ module.exports = {
             if (type == 0) {
                 reqData = {
                     $or: [ //多条件，数组
-                        { nick: { $regex: reg } },
-                        { phone: { $regex: reg } },
-                        { feeling: { $regex: reg } }
+                        {
+                            nick: {
+                                $regex: reg
+                            }
+                        },
+                        {
+                            phone: {
+                                $regex: reg
+                            }
+                        },
+                        {
+                            feeling: {
+                                $regex: reg
+                            }
+                        }
                     ]
                 }
             } else if (type == 1) {
                 reqData = {
                     $or: [ //多条件，数组
-                        { nick: { $regex: reg }, status: 1 },
-                        { phone: { $regex: reg }, status: 1 },
-                        { feeling: { $regex: reg }, status: 1 }
+                        {
+                            nick: {
+                                $regex: reg
+                            },
+                            status: 1
+                        },
+                        {
+                            phone: {
+                                $regex: reg
+                            },
+                            status: 1
+                        },
+                        {
+                            feeling: {
+                                $regex: reg
+                            },
+                            status: 1
+                        }
                     ]
                 }
             } else if (type == 2) {
                 reqData = {
 
                     $or: [ //多条件，数组
-                        { nick: { $regex: reg }, status: 2 },
-                        { phone: { $regex: reg }, status: 2 },
-                        { feeling: { $regex: reg }, status: 2 }
+                        {
+                            nick: {
+                                $regex: reg
+                            },
+                            status: 2
+                        },
+                        {
+                            phone: {
+                                $regex: reg
+                            },
+                            status: 2
+                        },
+                        {
+                            feeling: {
+                                $regex: reg
+                            },
+                            status: 2
+                        }
                     ]
                 }
             } else if (type == 3) {
                 reqData = {
                     $or: [ //多条件，数组
-                        { nick: { $regex: reg }, status: 0 },
-                        { phone: { $regex: reg }, status: 0 },
-                        { feeling: { $regex: reg }, status: 0 }
+                        {
+                            nick: {
+                                $regex: reg
+                            },
+                            status: 0
+                        },
+                        {
+                            phone: {
+                                $regex: reg
+                            },
+                            status: 0
+                        },
+                        {
+                            feeling: {
+                                $regex: reg
+                            },
+                            status: 0
+                        }
                     ]
                 }
             }
-            let uploadList = await Upload.find(reqData).skip(page * 10).limit(10).sort({ '_id': -1 })
+            let uploadList = await Upload.find(reqData).skip(page * 10).limit(10).sort({
+                '_id': -1
+            })
             let uploadTotal = await Upload.find(reqData)
             Json.res(ctx, 200, '获取成功', {
                 uploadList: uploadList,
@@ -129,8 +200,8 @@ module.exports = {
                     let checkResult = await Upload.updateOne({
                         _id: query.id
                     }, {
-                            $set: updateData
-                        })
+                        $set: updateData
+                    })
                     if (checkResult) {
                         Wechat.sendMessage(uploadItem.openid, {
                             first: wxMsg.comfirmSuccess,
@@ -171,8 +242,8 @@ module.exports = {
                     let checkResult = await Upload.updateOne({
                         _id: query.id
                     }, {
-                            $set: updateData
-                        })
+                        $set: updateData
+                    })
                     if (checkResult) {
                         Wechat.sendMessage(uploadItem.openid, {
                             first: wxMsg.confirmFail,
@@ -225,10 +296,10 @@ module.exports = {
         let save = await Wx.updateOne({
             id: '1'
         }, {
-                $set: {
-                    uploadLimit: query.limit
-                }
-            })
+            $set: {
+                uploadLimit: query.limit
+            }
+        })
         if (save) {
             Json.res(ctx, 200, '保存成功')
         } else {
@@ -272,20 +343,44 @@ module.exports = {
         let save = await Wx.updateOne({
             id: '1'
         }, {
-                $set: {
-                    "activeName": result.activeName,
-                    "uploadSuccess": result.uploadSuccess,
-                    "uploadBottom": result.uploadBottom,
-                    "confirmFail": result.confirmFail,
-                    "confirmFailBottom": result.confirmFailBottom,
-                    "comfirmSuccess": result.comfirmSuccess,
-                    "comfirmSuccessBottom": result.comfirmSuccessBottom
-                }
-            })
+            $set: {
+                "activeName": result.activeName,
+                "uploadSuccess": result.uploadSuccess,
+                "uploadBottom": result.uploadBottom,
+                "confirmFail": result.confirmFail,
+                "confirmFailBottom": result.confirmFailBottom,
+                "comfirmSuccess": result.comfirmSuccess,
+                "comfirmSuccessBottom": result.comfirmSuccessBottom
+            }
+        })
         if (save) {
             Json.res(ctx, 200, '保存成功')
         } else {
             Json.res(ctx, 201, '保存失败')
+        }
+    },
+    //获取职业测试数据
+    getCareerData: async (ctx, next) => {
+        let user = await CareerAuth.find()
+        let countData = await Count.findOne({
+            name: 'career'
+        })
+
+        if (user && countData) {
+            let total = user.length
+            Json.res(ctx, 200, '获取成功', {
+                userCount: total,
+                viewCount: countData.total,
+                resultCount: countData.finishTotal,
+                shareCount: countData.shareTotal
+            })
+        } else {
+            Json.res(ctx, 200, '获取成功', {
+                userCount: 0,
+                viewCount: 0,
+                resultCount: 0,
+                shareCount: 0
+            })
         }
     }
 }
