@@ -362,12 +362,18 @@ module.exports = {
     //获取职业测试数据
     getCareerData: async (ctx, next) => {
         let user = await CareerAuth.find()
+        
+        let query = ctx.request.query
         let countData = await Count.findOne({
-            name: 'career'
+            name: query.channel
         })
-
         if (user && countData) {
-            let total = user.length
+            let total = 0
+            user.forEach((e)=>{
+                if(e.channel&&e.channel.indexOf(query.channel)>-1){
+                    total +=1
+                }
+            })
             Json.res(ctx, 200, '获取成功', {
                 userCount: total,
                 viewCount: countData.total,
