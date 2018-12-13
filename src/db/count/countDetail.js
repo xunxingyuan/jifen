@@ -3,6 +3,7 @@ const Schema = mongoose.Schema;
 
 const mySchema = new Schema({
     userId: String,
-    time: Number
+    time: Number,
+    channel: String
 },{ collection: 'countdetail' })
 module.exports = mySchema
