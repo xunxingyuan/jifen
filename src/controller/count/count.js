@@ -18,7 +18,7 @@ module.exports = {
                 total: 1,
                 finishTotal: 0,
                 shareTotal: 0
-            })
+            }).save()
         }else{
             let countResult = await Count.updateOne({
                 name: query.channel
