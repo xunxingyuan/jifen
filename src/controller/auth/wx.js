@@ -29,9 +29,10 @@ module.exports = {
         let res = await Wx.findOne({
             id: '1'
         })
+        let query = ctx.request.query
         if (res) {
             let APPID = res.appID
-            let redirect_uri = Conf.server.url + "/career"
+            let redirect_uri = Conf.server.url + "/" + query.channel
             let url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + APPID + "&redirect_uri=" + redirect_uri + "&response_type=code&scope=snsapi_userinfo&state=123#wechat_redirect"
             Json.res(ctx, 200, '获取成功', {
                 url: url
@@ -41,7 +42,7 @@ module.exports = {
         }
     },
 
-    //职业测试用户
+    //渠道测试用户
     getTokenAuth: async (ctx, next) => {
         let res = await Wx.findOne({
             id: '1'
@@ -69,24 +70,46 @@ module.exports = {
                             let refreshUser = await User.updateOne({
                                 openid: response.data.openid
                             }, {
-                                $set: refreshData
-                            })
+                                    $set: refreshData
+                                })
                             let infoFind = await userAuth.findOne({
                                 openid: response.data.openid
                             })
-                            if(infoFind){
+                            if (infoFind) {
                                 if (refreshUser) {
-                                    Json.res(ctx, 200, '更新成功', {
-                                        id: user._id
-                                    })
+                                    let channel = infoFind.channel
+                                    if (channel.indexOf(query.channel) === -1) {
+                                        channel.push(query.channel)
+                                        let authData = {
+                                            channel: channel
+                                        }
+                                        let updateAuth = await userAuth.updateOne({
+                                            openid: response.data.openid
+                                        }, {
+                                                $set: authData
+                                            })
+                                        if (updateAuth) {
+                                            Json.res(ctx, 200, '更新成功', {
+                                                id: user._id
+                                            })
+                                        } else {
+                                            Json.res(ctx, 201, '更新用户失败')
+                                        }
+                                    } else {
+                                        Json.res(ctx, 200, '更新成功', {
+                                            id: user._id
+                                        })
+                                    }
                                 } else {
                                     Json.res(ctx, 201, '更新用户失败')
                                 }
-                            }else{
+                            } else {
                                 let infoUrl = "https://api.weixin.qq.com/sns/userinfo?access_token=" + response.data.access_token + "&openid=" + response.data.openid + "&lang=zh_CN"
                                 let responseInfo = await axios.get(infoUrl)
                                 if (responseInfo.status === 200) {
                                     let data = responseInfo.data
+                                    let channel = []
+                                    channel.push(query.channel)
                                     let userInfoData = {
                                         openid: data.openid,
                                         nickname: data.nickname,
@@ -94,17 +117,18 @@ module.exports = {
                                         province: data.province,
                                         city: data.city,
                                         country: data.country,
-                                        headimgurl: data.headimgurl
+                                        headimgurl: data.headimgurl,
+                                        channel: channel
                                     }
                                     let infoAdd = await new userAuth(userInfoData).save()
-                                    if (infoAdd&&refreshUser) {
+                                    if (infoAdd && refreshUser) {
                                         Json.res(ctx, 200, '新建用户信息成功', {
                                             id: user._id
                                         })
                                     } else {
                                         Json.res(ctx, 201, '更新用户数据失败')
                                     }
-                                }else{
+                                } else {
                                     Json.res(ctx, 201, '获取微信用户数据失败')
                                 }
                             }
@@ -122,6 +146,8 @@ module.exports = {
 
                             if (responseInfo.status === 200) {
                                 let data = responseInfo.data
+                                let channel = []
+                                channel.push(query.channel)
                                 let userInfoData = {
                                     openid: data.openid,
                                     nickname: data.nickname,
@@ -129,7 +155,8 @@ module.exports = {
                                     province: data.province,
                                     city: data.city,
                                     country: data.country,
-                                    headimgurl: data.headimgurl
+                                    headimgurl: data.headimgurl,
+                                    channel: channel
                                 }
                                 let infoAdd = await new userAuth(userInfoData).save()
                                 let userAdd = await new User(userData).save()
@@ -140,7 +167,7 @@ module.exports = {
                                 } else {
                                     Json.res(ctx, 201, '更新用户数据失败')
                                 }
-                            }else{
+                            } else {
                                 Json.res(ctx, 201, '获取微信用户数据失败')
                             }
 
@@ -187,8 +214,8 @@ module.exports = {
                             let refreshUser = await User.updateOne({
                                 openid: response.data.openid
                             }, {
-                                $set: refreshData
-                            })
+                                    $set: refreshData
+                                })
 
                             if (refreshUser) {
                                 Json.res(ctx, 200, '更新成功', {
@@ -270,8 +297,8 @@ module.exports = {
                                     let refreshUser = await User.updateOne({
                                         openid: refreshResult.data.openid
                                     }, {
-                                        $set: refreshData
-                                    })
+                                            $set: refreshData
+                                        })
                                     if (refreshUser) {
                                         Json.res(ctx, 200, '成功')
                                     } else {
@@ -333,8 +360,8 @@ module.exports = {
                     let tokenUpdate = await Wx.updateOne({
                         id: '1'
                     }, {
-                        $set: tokenData
-                    })
+                            $set: tokenData
+                        })
                     let sighResult = sign(ticketResult.data.ticket, query.url)
                     sighResult.appid = res.appID
                     if (tokenUpdate) {

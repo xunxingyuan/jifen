@@ -8,6 +8,7 @@ const mySchema = new Schema({
   province: String,
   city: String,
   country: String,
-  headimgurl: String
+  headimgurl: String,
+  channel: Array
 },{ collection: 'authuser' })
 module.exports = mySchema
