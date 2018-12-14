@@ -7,6 +7,7 @@ const sign = require('../../tools/sign')
 const Conf = require('../../../conf/conf')
 const UserInfo = db.UserInfo
 const userAuth = db.userAuth
+const Count = db.Count
 
 module.exports = {
     getCode: async (ctx, next) => {
@@ -48,6 +49,18 @@ module.exports = {
             id: '1'
         })
         let query = ctx.request.query
+        let countData = await Count.find({
+            name: query.channel
+        })
+        if(countData.length === 0){
+            let create = await new Count({
+                name: query.channel,
+                user: 1,
+                total: 1,
+                finishTotal: 0,
+                shareTotal: 0
+            }).save()
+        }
         if (query.code) {
             if (res) {
                 let APPID = res.appID
@@ -88,7 +101,15 @@ module.exports = {
                                         }, {
                                                 $set: authData
                                             })
-                                        if (updateAuth) {
+                                        let countResult = await Count.updateOne({
+                                            name: query.channel
+                                        }, {
+                                                $inc: {
+                                                    'user': 1
+                                                }
+                                            })
+
+                                        if (updateAuth && countResult) {
                                             Json.res(ctx, 200, '更新成功', {
                                                 id: user._id
                                             })
@@ -121,7 +142,14 @@ module.exports = {
                                         channel: channel
                                     }
                                     let infoAdd = await new userAuth(userInfoData).save()
-                                    if (infoAdd && refreshUser) {
+                                    let countResult = await Count.updateOne({
+                                        name: query.channel
+                                    }, {
+                                            $inc: {
+                                                'user': 1
+                                            }
+                                        })
+                                    if (infoAdd && refreshUser && countResult) {
                                         Json.res(ctx, 200, '新建用户信息成功', {
                                             id: user._id
                                         })
@@ -160,7 +188,14 @@ module.exports = {
                                 }
                                 let infoAdd = await new userAuth(userInfoData).save()
                                 let userAdd = await new User(userData).save()
-                                if (userAdd && infoAdd) {
+                                let countResult = await Count.updateOne({
+                                    name: query.channel
+                                }, {
+                                        $inc: {
+                                            'user': 1
+                                        }
+                                    })
+                                if (userAdd && infoAdd && countResult) {
                                     Json.res(ctx, 200, '新建成功', {
                                         id: userAdd._id
                                     })

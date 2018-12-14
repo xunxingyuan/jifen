@@ -9,17 +9,9 @@ const Json = require('../../tools/jsonResponse')
 module.exports = {
     enterPage: async (ctx, next) =>{
         let query = ctx.request.query
-        let countData = await Count.find({
-            name: query.channel
-        })
-        if(countData.length === 0){
-            let create = await new Count({
-                name: query.channel,
-                total: 1,
-                finishTotal: 0,
-                shareTotal: 0
-            }).save()
-        }else{
+
+        if(query.id){
+            let now = new Date().getTime()
             let countResult = await Count.updateOne({
                 name: query.channel
             },{
@@ -27,16 +19,12 @@ module.exports = {
                     'total': 1
                 }
             })
-        }
-        if(query.id){
-            let now = new Date().getTime()
-            
             let addResult = await  new CountDetail({
                 userId: query.id,
                 time: now,
                 channel: query.channel
             }).save()
-            if(addResult){
+            if(addResult&&countResult){
                 Json.res(ctx, 200, '计数成功')
             }else{
                 Json.res(ctx, 201, '更新数据失败')
