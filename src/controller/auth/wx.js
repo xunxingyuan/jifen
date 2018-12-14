@@ -56,7 +56,7 @@ module.exports = {
             let create = await new Count({
                 name: query.channel,
                 user: 1,
-                total: 1,
+                total: 0,
                 finishTotal: 0,
                 shareTotal: 0
             }).save()
